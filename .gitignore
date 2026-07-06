@@ -1,0 +1,57 @@
+# --- Environment & secrets ---
+.env
+*.env.local
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# --- Testing ---
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Logs ---
+logs/*.log
+logs/*.log.*
+logs/validation_reports/*
+
+# --- Data (raw/processed data should not bloat the repo) ---
+data/raw/*
+data/processed/*
+data/warehouse/*
+data/archive/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/warehouse/.gitkeep
+!data/archive/.gitkeep
+
+# --- Docker ---
+docker/postgres_init/*.sql
+
+# --- OS / Editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Airflow ---
+airflow/logs/
+airflow/airflow.db
+airflow/airflow.cfg
+
+# --- PySpark ---
+*.parquet
+spark-warehouse/
+metastore_db/
