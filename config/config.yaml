@@ -1,0 +1,76 @@
+﻿# =============================================================================
+# SupplyChain360 - Global Configuration
+# =============================================================================
+# This file holds NON-SECRET, environment-agnostic configuration.
+# Secrets (DB passwords, API keys) live in .env and are loaded separately.
+# =============================================================================
+
+project:
+  name: "SupplyChain360"
+  version: "0.1.0"
+  phase: "Phase 0 - Project Setup"
+  environment: "development"   # development | staging | production
+
+paths:
+  root: "."
+  data_raw: "data/raw"
+  data_processed: "data/processed"
+  data_warehouse: "data/warehouse"
+  data_archive: "data/archive"
+  logs: "logs"
+  sql: "sql"
+  notebooks: "notebooks"
+  dashboards_excel: "dashboards/Excel"
+  dashboards_powerbi: "dashboards/PowerBI"
+
+logging:
+  level: "INFO"                # DEBUG | INFO | WARNING | ERROR | CRITICAL
+  log_to_console: true
+  log_to_file: true
+  log_file_name: "supplychain360.log"
+  max_bytes: 5242880           # 5 MB per log file before rotation
+  backup_count: 5              # keep last 5 rotated log files
+  format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+
+database:
+  # Actual host/user/password come from .env (see .env.example)
+  # These are non-secret defaults / overrides.
+  driver: "postgresql"
+  port: 5432
+  db_name: "supplychain360"
+  schema: "public"
+  pool_size: 5
+  pool_max_overflow: 10
+  connect_timeout_seconds: 10
+
+apis:
+  weather_api:
+    base_url: "https://api.open-meteo.com/v1"
+    enabled: true
+  exchange_rate_api:
+    base_url: "https://api.exchangerate-api.com/v4"
+    enabled: true
+  holiday_api:
+    base_url: "https://date.nager.at/api/v3"
+    enabled: true
+  fuel_price_api:
+    enabled: false
+  product_info_api:
+    enabled: false
+
+ingestion:
+  supported_formats: ["csv", "xlsx", "json", "api"]
+  chunk_size_rows: 50000
+  encoding: "utf-8"
+
+validation:
+  fail_on_error: false          # if true, pipeline stops on validation failure
+  max_null_percentage: 0.30     # flag columns with > 30% nulls
+  report_output_dir: "logs/validation_reports"
+
+airflow:
+  dag_owner: "supplychain360_team"
+  retries: 2
+  retry_delay_minutes: 5
+  schedule_interval: "@daily"

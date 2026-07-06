@@ -1,0 +1,68 @@
+# =============================================================================
+# SupplyChain360 - Docker Compose
+# =============================================================================
+
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: supplychain360_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-supplychain360}
+      POSTGRES_USER: ${DB_USER:-supplychain360_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change_me}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres_init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-supplychain360_user} -d ${DB_NAME:-supplychain360}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - supplychain360_net
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: supplychain360_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@supplychain360.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-change_me}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - supplychain360_net
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: supplychain360_app
+    restart: "no"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+    networks:
+      - supplychain360_net
+    # Keeps the container alive so you can `docker exec -it` into it during dev.
+    tty: true
+    stdin_open: true
+
+volumes:
+  postgres_data:
+    name: supplychain360_postgres_data
+
+networks:
+  supplychain360_net:
+    name: supplychain360_net
