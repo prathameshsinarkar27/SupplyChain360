@@ -14,3 +14,5 @@ pandas==2.2.3
 openpyxl==3.1.5
 requests==2.32.3    
 pycountry==24.6.1
+
+Faker==26.0.0
