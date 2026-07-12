@@ -1,0 +1,118 @@
+﻿# =============================================================================
+# SupplyChain360 - Data Source Registry
+# =============================================================================
+# Single source of truth describing every data source the platform ingests.
+# =============================================================================
+
+sources:
+
+  # ---------------------------------------------------------------------
+  # 1. Core transactions, orders & logistics
+  # ---------------------------------------------------------------------
+  dataco_supply_chain:
+    description: "DataCo Smart Supply Chain Dataset - orders, shipping, delivery, financials"
+    kaggle_slug: "shashwatwork/dataco-smart-supply-chain-for-big-data-analysis"
+    format: "csv"
+    encoding: "latin-1"          # DataCo's CSV is NOT plain UTF-8 - verified during acquisition
+    raw_dir: "data/raw/dataco"
+    expected_files:
+      - "DataCoSupplyChainDataset.csv"
+      - "DescriptionDataCoSupplyChain.csv"
+    primary_key: "Order Id"
+    feeds:
+      - FactOrders
+      - FactShipments
+      - FactPayments
+
+  # ---------------------------------------------------------------------
+  # 2. Inventory management
+  # ---------------------------------------------------------------------
+  retail_inventory:
+    description: "Retail Store Inventory Forecasting Dataset - daily inventory ledger"
+    kaggle_slug: "anirudhchauhan/retail-store-inventory-forecasting-dataset"
+    format: "csv"
+    encoding: "utf-8"
+    raw_dir: "data/raw/inventory"
+    expected_files:
+      - "retail_store_inventory.csv"
+    primary_key: ["Date", "Store ID", "Product ID"]
+    feeds:
+      - FactInventory
+
+  # ---------------------------------------------------------------------
+  # 3. Product catalog enrichment
+  # ---------------------------------------------------------------------
+  amazon_products:
+    description: "Amazon Products Dataset (2023) - product catalog with categories, pricing, ratings"
+    kaggle_slug: "lokeshparab/amazon-products-dataset"
+    format: "csv"
+    encoding: "utf-8"
+    raw_dir: "data/raw/amazon_products"
+    expected_files:
+      - "*.csv"   # dataset ships as multiple category-level CSVs; confirmed during acquisition
+    primary_key: null  # assigned a surrogate key during ETL (Phase 3)
+    feeds:
+      - DimProduct
+
+  # ---------------------------------------------------------------------
+  # 4. Customer feedback
+  # ---------------------------------------------------------------------
+  amazon_reviews:
+    description: "Amazon Reviews 2023 Dataset - ratings, review text, verified purchase flag"
+    kaggle_slug: "ravirajbabasomane/amazon-reviews-2023"
+    format: "csv"
+    encoding: "utf-8"
+    raw_dir: "data/raw/amazon_reviews"
+    expected_files:
+      - "*.csv"   # confirmed exact name during acquisition
+    primary_key: null
+    feeds:
+      - FactReturns   # review sentiment used as a proxy signal alongside returns
+
+  # ---------------------------------------------------------------------
+  # 5. Generated master data (synthetic - no public dataset covers these)
+  # ---------------------------------------------------------------------
+  generated_master_data:
+    description: "Synthetic Warehouse, Supplier, Courier, Vehicle, and Delivery Route master tables"
+    kaggle_slug: null
+    format: "csv"
+    encoding: "utf-8"
+    raw_dir: "data/raw/master_generated"
+    expected_files:
+      - "warehouses.csv"
+      - "suppliers.csv"
+      - "courier_partners.csv"
+      - "vehicles.csv"
+      - "delivery_routes.csv"
+    primary_key: "id"
+    feeds:
+      - DimWarehouse
+      - DimSupplier
+      - DimCourier
+
+  # ---------------------------------------------------------------------
+  # 6. External APIs (live, no download required)
+  # ---------------------------------------------------------------------
+  weather_api:
+    description: "Open-Meteo - historical/forecast weather by lat/lon"
+    format: "api"
+    base_url: "https://api.open-meteo.com/v1"
+    raw_dir: "data/raw/external_apis"
+    feeds:
+      - DimWeather
+
+  holiday_api:
+    description: "Nager.Date - public holidays by country/year"
+    format: "api"
+    base_url: "https://date.nager.at/api/v3"
+    raw_dir: "data/raw/external_apis"
+    feeds:
+      - DimDate
+
+  exchange_rate_api:
+    description: "Exchange Rate API - daily currency conversion rates"
+    format: "api"
+    base_url: "https://api.exchangerate-api.com/v4"
+    raw_dir: "data/raw/external_apis"
+    feeds:
+      - FactOrders   # currency-normalized order values
